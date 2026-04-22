@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checklist de Seminovos</title>
+
+  <!-- Biblioteca html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    :root{
+      --bg: #f0f4fa;
+      --card: #ffffff;
+      --text: #0f2a54;
+      --line: #dae4f2;
+      --accent: #2f7ae5;
+      --accent-2: #1d63dc;
+      --danger: #e11d48;
+      --radius: 12px;
+      --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    *{ box-sizing: border-box; }
+
+    body{
+      margin: 0;
+      padding: 30px;
+      font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .container{
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    /* === CABEÇALHO === */
+    .main-header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e2e8f0;
+    }
+
+    .main-header h1 {
+      margin: 0;
+      font-size: 20px; 
+      color: var(--accent-2);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* === GRID PRINCIPAL === */
+    .main-grid{
+      display: grid;
+      grid-template-columns: 380px 1fr; 
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    .card{
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid #e2e8f0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .field-group{ margin-bottom: 12px; }
+
+    .field-group label{
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--accent-2);
+      font-size: 13px;
+    }
+
+    .field-group input[type="text"],
+    .field-group input[type="date"],
+    .field-group textarea{
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 14px;
+      color: #334155; 
+      outline: none;
+    }
+
+    /* COR DO PLACEHOLDER (Texto de Exemplo) */
+    .field-group input::placeholder,
+    .field-group textarea::placeholder {
+      color: #94a3b8; 
+      opacity: 1; 
+    }
+
+    /* --- AJUSTE PARA O CAMPO DE DATA --- */
+    .field-group input[type="date"] {
+      color: #94a3b8;
+    }
+    .field-group input[type="date"]:focus,
+    .field-group input[type="date"].has-content {
+      color: #334155;
+    }
+
+    .field-group input:focus,
+    .field-group textarea:focus{
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 122, 229, 0.15);
+    }
+
+    .field-group textarea{
+      resize: vertical;
+      min-height: 180px; 
+      font-family: inherit;
+    }
+
+    #observacoes {
+      background-image: repeating-linear-gradient(transparent, transparent 29px, #cbd5e1 29px, #cbd5e1 30px);
+      line-height: 30px;
+      background-attachment: local;
+    }
+
+    .form-row-2{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ======= SELECTS CUSTOMIZADOS ======= */
+    .custom-select{ position: relative; width: 100%; }
+    
+    .select-trigger{
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #ffffff;
+      font-size: 14px;
+      cursor: pointer;
+      color: #94a3b8; /* Cor inicial Cinza Claro */
+    }
+    
+    .select-trigger .placeholder{ color: #94a3b8; font-weight: 400; }
+    .select-trigger .value{ color: #0f172a; font-weight: 500; }
+    
+    .chev{
+      width: 8px; height: 8px;
+      border-right: 2px solid #64748b;
+      border-bottom: 2px solid #64748b;
+      transform: rotate(45deg);
+      transition: 0.2s;
+    }
+    .custom-select.open .chev{ transform: rotate(-135deg); }
+
+    .select-menu{
+      position: absolute;
+      left: 0; right: 0; top: 110%;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+      padding: 4px;
+      list-style: none;
+      z-index: 50;
+      display: none;
+    }
+    .custom-select.open .select-menu{ display: block; }
+
+    .select-menu li{
+      padding: 10px 12px;
+      font-size: 14px;
+      color: #334155;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    .select-menu li:hover{ background: #f1f5f9; color: var(--accent-2); }
+    .select-value-output{ display: none; padding: 12px; font-weight: 700; border: 1px solid var(--line); border-radius: 8px; }
+
+    /* ======= ÁREA DO CARRO ======= */
+    
+    .car-container-box{
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      margin-top: 0; 
+    }
+
+    .car-header{
+      padding: 12px 16px;
+      border-bottom: 1px solid #f1f5f9;
+      font-weight: 700;
+      color: #0f172a;
+      background: #fff;
+      font-size: 14px;
+      text-align: center;
+    }
+
+    .image-container{
+      position: relative;
+      width: 100%;
+      height: auto; 
+      cursor: crosshair;
+      user-select: none;
+      touch-action: none;
+      font-size: 0;
+      line-height: 0;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: auto;
+      display: block;
+      pointer-events: none;
+    }
+
+    .mark{
+      position: absolute;
+      width: 24px; height: 24px;
+      font-size: 16px;
+      line-height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      color: var(--danger);
+      font-weight: bold;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--danger);
+      transform: translate(-50%, -50%);
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(225, 29, 72, 0.3);
+      z-index: 100;
+    }
+
+    .btn-wrapper{
+      display: flex; 
+      justify-content: center; 
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .btn{
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 15px;
+      border: none;
+      transition: 0.2s;
+    }
+    .btn-secondary{ background: #fff; border: 1px solid #cbd5e1; color: #334155; }
+    .btn-primary{ background: #3b82f6; color: #fff; box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3); }
+    .btn:hover{ transform: translateY(-1px); }
+
+    /* === CRÉDITO DO DESENVOLVEDOR === */
+    .developer-credit {
+      text-align: center;
+      margin-top: 15px; /* Espaço logo após o textarea */
+      font-size: 12px;
+      color: #94a3b8; 
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    /* ====== MODO GERAÇÃO DE IMAGEM ====== */
+    body.pdf-mode {
+      padding: 0 !important;
+      margin: 0 !important;
+      background: #fff !important;
+      width: 1400px; 
+    }
+    
+    body.pdf-mode .container { 
+      padding: 20px; 
+      max-width: 1400px;
+    }
+
+    body.pdf-mode .main-grid {
+      grid-template-columns: 400px 1fr !important;
+      align-items: stretch;
+    }
+    
+    body.pdf-mode .car-container-box {
+      height: auto;
+      justify-content: center;
+    }
+
+    body.pdf-mode .no-pdf, body.pdf-mode .pdf-hide { display: none !important; }
+    
+    body.pdf-mode .custom-select .select-trigger,
+    body.pdf-mode .custom-select .select-menu { display: none !important; }
+    body.pdf-mode .custom-select .select-value-output { display: block !important; background: #f8fafc; border-color: #cbd5e1; }
+    
+    body.pdf-mode input, body.pdf-mode textarea { 
+      border: 1px solid #cbd5e1 !important; 
+      background: #f8fafc !important; 
+      color: #000 !important;
+    }
+
+    @media (max-width: 1100px){
+      .main-grid{ grid-template-columns: 1fr; }
+    }
+
+    /* ====== MODO DE IMPRESSÃO (CTRL+P) ====== */
+    @media print {
+      @page {
+        size: A4 landscape;
+        margin: 10mm;
+      }
+      body {
+        padding: 0;
+        background: #fff;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+      .no-pdf { display: none !important; }
+      .container { max-width: 100%; margin: 0; padding: 0; }
+      
+      .main-grid {
+        display: grid !important;
+        grid-template-columns: 350px 1fr !important;
+        gap: 20px;
+        align-items: stretch;
+      }
+
+      /* Transforma os selects em áreas visuais */
+      .custom-select .select-trigger,
+      .custom-select .select-menu { display: none !important; }
+      .custom-select .select-value-output { display: block !important; background: #f8fafc; border-color: #cbd5e1; }
+      
+      input, textarea { 
+        border: 1px solid #cbd5e1 !important; 
+        background: #f8fafc !important; 
+        color: #000 !important;
+        box-shadow: none !important;
+      }
+      
+      #observacoes {
+        background-color: #f8fafc !important;
+        background-image: repeating-linear-gradient(transparent, transparent 29px, #cbd5e1 29px, #cbd5e1 30px) !important;
+      }
+
+      .car-container-box { border-color: #cbd5e1; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container" id="pdf-content">
+    
+    <!-- CABEÇALHO -->
+    <header class="main-header">
+      <h1>CHECKLIST DE MANUTENÇÃO - SEMINOVOS</h1>
+    </header>
+
+    <div class="main-grid">
+      
+      <!-- ESQUERDA: FORMULÁRIO E ASSINATURAS -->
+      <div style="display: flex; flex-direction: column; height: 100%;">
+        <section class="card" style="flex-grow: 1;">
+          
+
+
+
+
+        <div class="field-group">
+          <label>Modelo e Cor do Veículo:</label>
+          <input type="text" id="car-model">
+        </div>
+
+        <div class="form-row-2">
+          <div class="field-group">
+            <label>Placa:</label>
+            <input type="text" id="car-plate">
+          </div>
+          <div class="field-group">
+            <label>Data da solicitação:</label>
+            <input type="text" id="data-venda">
+          </div>
+        </div>
+
+
+
+
+
+        <div class="field-group" style="flex-grow: 1; display: flex; flex-direction: column;">
+          <label>Observações:</label>
+          <textarea id="observacoes" style="flex-grow: 1;"></textarea>
+        </div>
+
+        </section>
+      </div>
+
+      <!-- DIREITA: CARRO -->
+      <div style="display: flex; flex-direction: column; height: 100%;">
+        <div class="car-container-box" style="flex-grow: 1;">
+          <div class="car-header">Clique no local correspondente a peça/pneu que precisa de manutenção</div>
+          <div class="image-container" id="vehicle-container">
+            <img src="contorno.png" alt="Contorno do Veículo" id="car-img">
+          </div>
+        </div>
+
+        <!-- ASSINATURAS MOVIDAS PARA BAIXO DO CARRO -->
+        <div class="signatures" style="margin-top: 40px; margin-bottom: 10px; display: flex; justify-content: center; gap: 50px;">
+          <div style="width: 200px; text-align: center;">
+            <div style="border-bottom: 1px solid #0f172a; margin-bottom: 8px;"></div>
+            <div style="font-size: 13px; font-weight: bold; color: #0f172a;">Gestor da Loja</div>
+          </div>
+          <div style="width: 200px; text-align: center;">
+            <div style="border-bottom: 1px solid #0f172a; margin-bottom: 8px;"></div>
+            <div style="font-size: 13px; font-weight: bold; color: #0f172a;">Solicitante da<br>Preparação</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ESPAÇO VAZIO NA ESQUERDA PARA A SEGUNDA LINHA DO GRID (OCULTO) -->
+      <div class="no-pdf" style="display: none;"></div>
+
+      <!-- BOTÃO NA DIREITA PARA A SEGUNDA LINHA DO GRID (OCULTO) -->
+      <div class="no-pdf" style="display: none;">
+        <div class="btn-wrapper" style="margin-top: 0;">
+          <button id="generate-pdf" class="btn btn-primary">GERAR CHECKLIST</button>
+        </div>
+        
+        <div id="pdf-status" style="text-align:right; margin-top:5px; color:#64748b; font-size:12px;"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // URL da imagem
+    const IMAGE_URL = 'contorno.png';
+
+    /* 1. PRÉ-CARREGAR IMAGEM EM BASE64 */
+    window.addEventListener('load', async () => {
+      const imgEl = document.getElementById('car-img');
+      if(!imgEl) return;
+      
+      try {
+        const res = await fetch(IMAGE_URL);
+        const blob = await res.blob();
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          imgEl.src = reader.result;
+        };
+        reader.readAsDataURL(blob);
+      } catch (err) {
+        console.error('Imagem carregada via link direto (pode falhar o export se CORS bloquear).');
+      }
+    });
+
+    /* 2. LÓGICA DO MARKER */
+    function addMarker(container, e) {
+      const rect = container.getBoundingClientRect();
+      
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+      }
+
+      const x = clientX - rect.left;
+      const y = clientY - rect.top;
+
+      const percentX = (x / rect.width) * 100;
+      const percentY = (y / rect.height) * 100;
+
+      const mark = document.createElement('div');
+      mark.classList.add('mark');
+      mark.innerText = 'X';
+      mark.style.left = percentX + '%';
+      mark.style.top = percentY + '%';
+      
+      mark.onpointerdown = (ev) => { 
+        ev.stopPropagation(); 
+        mark.remove(); 
+      };
+      
+      container.appendChild(mark);
+    }
+
+    const vCont = document.getElementById('vehicle-container');
+    
+    vCont.addEventListener('pointerdown', (e) => {
+      if (e.target === vCont || e.target.tagName === 'IMG') {
+        e.preventDefault(); 
+        addMarker(vCont, e);
+      }
+    });
+
+    /* 3. LÓGICA DOS SELECTS */
+    document.querySelectorAll('.custom-select').forEach(sel => {
+      const trigger = sel.querySelector('.select-trigger');
+      const hidden = sel.querySelector('input[type="hidden"]');
+      const output = sel.querySelector('.select-value-output');
+      const placeholderSpan = trigger.querySelector('.placeholder');
+
+      trigger.onclick = (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.custom-select.open').forEach(s => s !== sel && s.classList.remove('open'));
+        sel.classList.toggle('open');
+      };
+
+      sel.querySelectorAll('li').forEach(li => {
+        li.onclick = (e) => {
+          e.stopPropagation();
+          const val = li.getAttribute('data-value');
+          hidden.value = val;
+          placeholderSpan.innerText = val;
+          placeholderSpan.style.color = '#0f172a';
+          placeholderSpan.style.fontWeight = '600';
+          
+          /* Ao selecionar, o trigger volta a ter cor escura */
+          trigger.style.color = '#0f172a';
+          
+          if(output) output.innerText = val;
+          sel.classList.remove('open');
+        };
+      });
+    });
+
+    document.onclick = () => {
+      document.querySelectorAll('.custom-select.open').forEach(s => s.classList.remove('open'));
+    };
+
+    /* 4. LÓGICA PARA COR DO INPUT DE DATA */
+    document.querySelectorAll('input[type="date"]').forEach(input => {
+      input.addEventListener('change', function() {
+        if(this.value) {
+          this.classList.add('has-content');
+        } else {
+          this.classList.remove('has-content');
+        }
+      });
+      // Verificação inicial
+      if(input.value) input.classList.add('has-content');
+    });
+
+
+    /* 5. GERAR JPG */
+    document.getElementById('generate-pdf').onclick = async () => {
+      const btn = document.getElementById('generate-pdf');
+      const status = document.getElementById('pdf-status');
+      const container = document.getElementById('pdf-content');
+
+      btn.disabled = true;
+      status.innerText = 'Gerando imagem...';
+      
+      document.body.classList.add('pdf-mode');
+
+      const inputs = [];
+      document.querySelectorAll('input[type="text"], input[type="date"], textarea').forEach(el => {
+        const span = document.createElement('div');
+        const style = window.getComputedStyle(el);
+        span.style.cssText = `
+          border: ${style.border}; 
+          background: ${style.background}; 
+          background-image: ${style.backgroundImage};
+          padding: ${style.padding}; 
+          border-radius: ${style.borderRadius};
+          font-family: ${style.fontFamily};
+          font-size: ${style.fontSize};
+          line-height: ${style.lineHeight};
+          min-height: ${el.tagName === 'TEXTAREA' ? '180px' : 'auto'};
+          white-space: pre-wrap;
+          margin-bottom: ${style.marginBottom};
+          color: #000;
+        `;
+        
+        // --- LÓGICA DE FORMATAÇÃO DE DATA (BRASIL) ---
+        let displayValue = el.value;
+        if(el.type === 'date' && displayValue){
+           const parts = displayValue.split('-');
+           if(parts.length === 3){
+             displayValue = `${parts[2]}/${parts[1]}/${parts[0]}`;
+           }
+        }
+        
+        span.innerText = displayValue;
+        
+        el.style.display = 'none';
+        el.parentNode.insertBefore(span, el);
+        inputs.push({el, span});
+      });
+
+      try {
+        await new Promise(r => setTimeout(r, 100));
+
+        const canvas = await html2canvas(container, {
+          scale: 2, 
+          useCORS: true, 
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          scrollX: 0,
+          scrollY: -window.scrollY,
+          windowWidth: 1400 
+        });
+
+        const link = document.createElement('a');
+        
+        // NOME: Modelo - Placa
+        const model = (document.getElementById('car-model').value || 'Modelo').trim();
+        const plate = (document.getElementById('car-plate').value || 'Placa').trim();
+        
+        const rawName = `${model}-${plate}`;
+        const filename = rawName.replace(/[^a-z0-9\-\.]/gi, '_') + '.jpg';
+        
+        link.download = filename;
+        link.href = canvas.toDataURL('image/jpeg', 0.9);
+        link.click();
+        
+        status.innerText = 'Sucesso!';
+        setTimeout(() => status.innerText = '', 3000);
+
+      } catch (err) {
+        console.error(err);
+        status.innerText = 'Erro ao gerar. Tente novamente.';
+      } finally {
+        document.body.classList.remove('pdf-mode');
+        inputs.forEach(item => {
+          item.span.remove();
+          item.el.style.display = '';
+        });
+        btn.disabled = false;
+      }
+    };
+  </script>
+</body>
+</html>
